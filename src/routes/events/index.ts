@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from "fastify";
 import { Type } from "typebox";
 import type { FastifyTypebox } from "../../app.js";
+import { toICalendar } from "../../events/ical.js";
 import { applyPatch, parseEvent, toEvent } from "../../events/model.js";
 import { occurrencesBetween } from "../../events/recurrence.js";
 import {
@@ -23,8 +24,9 @@ const tags = ["Events"];
 const security = [{ Auth: [] }];
 
 /**
- * CRUD for a user's custom timetable events, plus a read-only view that
- * expands recurrences into concrete occurrences for rendering a timetable.
+ * CRUD for a user's custom timetable events, plus two read-only views:
+ * recurrences expanded into concrete occurrences for rendering a timetable,
+ * and an iCalendar export.
  *
  * Every route is authenticated, and data access goes through `eventStore`,
  * which confines each user to their own events.
@@ -121,6 +123,28 @@ const events: FastifyPluginAsync = async (
             end: occurrence.end.toISOString(),
           }));
       },
+    );
+
+    fastify.get(
+      "/calendar.ics",
+      {
+        schema: {
+          summary: "Export events as iCalendar",
+          description:
+            "Returns all of the user's events as an RFC 5545 `.ics` file, recurrences included, for import into calendar apps.",
+          tags,
+          security,
+          produces: ["text/calendar"],
+          response: {
+            200: Type.String({ description: "An iCalendar (.ics) file." }),
+          },
+        },
+      },
+      async (request, reply) =>
+        reply
+          .type("text/calendar; charset=utf-8")
+          .header("content-disposition", 'attachment; filename="timetable.ics"')
+          .send(toICalendar(await storeOf(request.user).list())),
     );
 
     fastify.get(

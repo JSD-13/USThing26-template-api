@@ -262,3 +262,19 @@ describe("occurrences", () => {
     expect(res.statusCode).toBe(400);
   });
 });
+
+describe("iCalendar export", () => {
+  test("exports the user's events as a downloadable .ics file", async () => {
+    await create("alice");
+    await create("bob", { ...LECTURE, title: "Bob's event" });
+
+    const res = await request("alice", { url: "/events/calendar.ics" });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.headers["content-type"]).toBe("text/calendar; charset=utf-8");
+    expect(res.headers["content-disposition"]).toContain("timetable.ics");
+    expect(res.payload).toContain("SUMMARY:COMP 3111 Lecture");
+    expect(res.payload).toContain("RRULE:FREQ=WEEKLY");
+    expect(res.payload).not.toContain("Bob's event");
+  });
+});
