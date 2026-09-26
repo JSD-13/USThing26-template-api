@@ -3,7 +3,7 @@ import { Type } from "typebox";
 import type { FastifyTypebox } from "../../app.js";
 import { toICalendar } from "../../events/ical.js";
 import { applyPatch, parseEvent, toEvent } from "../../events/model.js";
-import { occurrencesBetween } from "../../events/recurrence.js";
+import { DAY_MS, occurrencesBetween } from "../../events/recurrence.js";
 import {
   Event,
   EventInput,
@@ -18,7 +18,6 @@ import { HttpError } from "../../plugins/sensible.js";
 
 /** The widest window `GET /events/occurrences` expands, bounding its cost. */
 const MAX_WINDOW_DAYS = 366;
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 const tags = ["Events"];
 const security = [{ Auth: [] }];

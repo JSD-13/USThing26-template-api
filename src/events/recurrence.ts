@@ -35,7 +35,7 @@ export type Schedule = {
 
 export type Occurrence = { start: Date; end: Date };
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+export const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** The latest instant a `Date` can represent. */
 const END_OF_TIME = new Date(8.64e15);
