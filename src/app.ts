@@ -62,9 +62,8 @@ const app: FastifyPluginAsync<AppOptions> = async (
         },
       ],
       tags: [
-        { name: "Example", description: "Example endpoints" },
         { name: "Events", description: "Custom timetable events" },
-        { name: "Auth", description: "Auth endpoints" },
+        { name: "Auth", description: "The authenticated user" },
       ],
       components: {
         securitySchemes: {
