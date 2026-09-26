@@ -13,7 +13,7 @@ import type {
 } from "./schemas.js";
 import { isTimeZone } from "./time-zone.js";
 
-export const DEFAULT_TIME_ZONE = "Asia/Hong_Kong";
+const DEFAULT_TIME_ZONE = "Asia/Hong_Kong";
 
 /** The validated, user-editable part of an event, as stored. */
 export type EventFields = Schedule & {
