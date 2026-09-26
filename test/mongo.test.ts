@@ -1,5 +1,5 @@
 // Proves the default MongoDB wiring: with no MONGO_URI configured, building
-// the app spawns an in-memory MongoDB and prepares the `example` collection —
+// the app spawns an in-memory MongoDB and prepares the `events` collection —
 // no external services needed.
 //
 // The app plugin is wrapped in `fastify-plugin` at the registration site (the
@@ -14,7 +14,7 @@ import Fastify from "fastify";
 import fp from "fastify-plugin";
 import App from "../src/app.js";
 
-test("the example collection roundtrips documents in the in-memory MongoDB", async () => {
+test("the events collection is created with its owner/start index", async () => {
   // pluginTimeout covers the first-run download of the in-memory MongoDB
   // binary, which can outlast Fastify's 10s default.
   const app = Fastify({ pluginTimeout: 5 * 60 * 1000 });
@@ -27,11 +27,12 @@ test("the example collection roundtrips documents in the in-memory MongoDB", asy
   });
   await app.ready();
 
-  const inserted = await app.collections.example.insertOne({ example: 42 });
-  const found = await app.collections.example.findOne({
-    _id: inserted.insertedId,
-  });
-  assert.equal(found?.example, 42);
+  const indexes = await app.collections.events.indexes();
+  assert.ok(
+    indexes.some(
+      (index) => JSON.stringify(index.key) === '{"owner":1,"start":1}',
+    ),
+  );
 });
 
 test("the app reports ready with the collections decorated", async () => {

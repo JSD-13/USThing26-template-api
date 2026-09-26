@@ -1,8 +1,9 @@
 import mongodb from "@fastify/mongodb";
 import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
-import type { Collection, Document } from "mongodb";
+import type { Collection } from "mongodb";
 import packageJson from "../../package.json" with { type: "json" };
+import type { EventDocument } from "../events/model.js";
 
 /**
  * Options for {@link resolveMongoUri} and {@link mongoPlugin}.
@@ -182,16 +183,18 @@ export default fp<InitMongoPluginOptions>(async (fastify, opts) => {
         "MongoDB database handle is unavailable; mongoPlugin did not connect. Check MONGO_URI and the MongoDB server.",
       );
     }
-    const example = db.collection<Document>("example");
-    await example.createIndex({ example: 1 });
-    fastify.decorate("collections", { example });
+    const events = db.collection<EventDocument>("events");
+    // Serves every query in `eventStore`: all filter by owner, then sort or
+    // range-filter by start.
+    await events.createIndex({ owner: 1, start: 1 });
+    fastify.decorate("collections", { events });
   });
 });
 
 declare module "fastify" {
   export interface FastifyInstance {
     collections: {
-      example: Collection<Document>;
+      events: Collection<EventDocument>;
     };
   }
 }
