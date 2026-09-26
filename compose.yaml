@@ -1,11 +1,14 @@
-# Local development MongoDB for template-api (MONGO_URI points here by
-# default). Without it, dev and tests fall back to an in-memory MongoDB.
+# The whole service: the API on http://localhost:3000 and its MongoDB.
 #
-# Start it:
+# Start both:
 #
-#   docker compose up -d
+#   docker compose up -d --build
 #
-# Stop it:
+# Or only the database, for `bun run dev` with MONGO_URI from .env.example:
+#
+#   docker compose up -d mongodb
+#
+# Stop:
 #
 #   docker compose stop
 #
@@ -14,9 +17,21 @@
 #   docker compose down -v
 
 services:
+  api:
+    build: .
+    container_name: timetable-api
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/timetable-api
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+
   mongodb:
     image: mongo:8.3.4
-    container_name: template-api-mongo
+    container_name: timetable-api-mongo
     ports:
       - "127.0.0.1:27018:27017"
     volumes:
